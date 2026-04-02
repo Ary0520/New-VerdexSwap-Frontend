@@ -13,9 +13,14 @@ const Hero = () => {
             The next-generation DEX on Arbitrum Sepolia featuring the industry's first self-sustaining IL Shield. Institutional security for the retail liquidity provider.
           </p>
           <div className="flex flex-wrap gap-4">
-            <button className="bg-primary-container text-on-primary-container px-8 py-4 font-headline font-bold rounded-md flex items-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,157,0.3)] transition-all">
+            <a
+              href="/swap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-primary-container text-on-primary-container px-8 py-4 font-headline font-bold rounded-md flex items-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,157,0.3)] transition-all"
+            >
               Launch App <span className="material-symbols-outlined">rocket_launch</span>
-            </button>
+            </a>
             <button className="border border-outline-variant text-on-surface px-8 py-4 font-headline font-bold rounded-md hover:bg-surface-container-highest transition-all">
               Read the Docs
             </button>

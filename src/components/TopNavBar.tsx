@@ -12,9 +12,14 @@ const TopNavBar = () => {
           <a className="font-headline font-bold tracking-tight text-sm text-[#B9CBBC] hover:text-[#00FF9D] transition-colors" href="#">Pools</a>
           <a className="font-headline font-bold tracking-tight text-sm text-[#B9CBBC] hover:text-[#00FF9D] transition-colors" href="#">Blog</a>
         </div>
-        <button className="bg-primary-container text-on-primary-container px-6 py-2 font-headline font-bold text-sm rounded-md active:scale-95 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,157,0.4)]">
+        <a
+          href="/swap"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-primary-container text-on-primary-container px-6 py-2 font-headline font-bold text-sm rounded-md active:scale-95 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,157,0.4)]"
+        >
           Launch App
-        </button>
+        </a>
       </div>
     </nav>
   );
