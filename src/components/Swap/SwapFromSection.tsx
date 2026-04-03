@@ -1,5 +1,5 @@
 import TokenSelector from '../shared/TokenSelector';
-import { getToken, type Token } from '../shared/tokens';
+import { type Token } from '../shared/tokens';
 
 type Props = {
   value: string;
@@ -7,38 +7,48 @@ type Props = {
   token: Token;
   onTokenChange: (t: Token) => void;
   excludeSymbol?: string;
+  balance?: string;
+  usdValue?: string;
+  onPercent?: (pct: number) => void;
+  insufficientBalance?: boolean;
 };
 
-const SwapFromSection = ({ value, onChange, token, onTokenChange, excludeSymbol }: Props) => {
+const SwapFromSection = ({
+  value, onChange, token, onTokenChange, excludeSymbol,
+  balance = '—', usdValue, onPercent, insufficientBalance,
+}: Props) => {
   return (
     <div
-      className="relative rounded-lg px-5 pt-5 pb-4"
+      className="relative rounded-lg px-5 pt-5 pb-4 transition-colors"
       style={{
         background: 'rgba(14,14,15,0.5)',
-        border: '1px solid rgba(255,255,255,0.05)',
+        border: `1px solid ${insufficientBalance ? 'rgba(255,100,100,0.3)' : 'rgba(255,255,255,0.05)'}`,
         minHeight: 120,
       }}
     >
-      {/* Row 1: FROM label + balance + 50%/MAX */}
+      {/* Row 1 */}
       <div className="flex items-center justify-between mb-3">
-        <span
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}
-        >
+        <span className="text-xs font-bold uppercase tracking-widest"
+          style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}>
           From
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-            Balance: 1.24 {token.symbol}
+          <span
+            className="text-xs"
+            style={{ color: insufficientBalance ? '#FF6464' : '#B9CBBC', fontFamily: 'Inter' }}
+          >
+            Balance: {balance} {token.symbol}
           </span>
           <button
-            className="px-2 py-0.5 rounded text-xs font-bold"
+            onClick={() => onPercent?.(50)}
+            className="px-2 py-0.5 rounded text-xs font-bold transition-colors hover:brightness-110"
             style={{ background: '#353436', color: '#E5E2E3', fontFamily: 'Inter' }}
           >
             50%
           </button>
           <button
-            className="px-2 py-0.5 rounded text-xs font-bold"
+            onClick={() => onPercent?.(100)}
+            className="px-2 py-0.5 rounded text-xs font-bold transition-colors hover:brightness-110"
             style={{ background: 'rgba(0,255,157,0.2)', color: '#56FFA8', fontFamily: 'Inter' }}
           >
             MAX
@@ -46,7 +56,7 @@ const SwapFromSection = ({ value, onChange, token, onTokenChange, excludeSymbol 
         </div>
       </div>
 
-      {/* Row 2: Input + token selector */}
+      {/* Row 2 */}
       <div className="flex items-center gap-3">
         <input
           type="number"
@@ -60,14 +70,13 @@ const SwapFromSection = ({ value, onChange, token, onTokenChange, excludeSymbol 
       </div>
 
       {/* Row 3: USD value */}
-      <div className="mt-2">
-        <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-          ≈ $2,345.50
-        </span>
-      </div>
+      {usdValue && (
+        <div className="mt-2">
+          <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>{usdValue}</span>
+        </div>
+      )}
     </div>
   );
 };
 
-export { getToken };
 export default SwapFromSection;

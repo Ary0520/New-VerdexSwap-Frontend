@@ -31,7 +31,7 @@ const AppSidebar = () => {
             key={item.label}
             to={item.to}
             end={item.to === '/swap'}
-            className={({ isActive }) =>
+            className={(_) =>
               `flex items-center gap-3 px-4 py-3 rounded w-full transition-colors`
             }
             style={({ isActive }) => ({

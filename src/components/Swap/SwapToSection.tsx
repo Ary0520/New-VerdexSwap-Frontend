@@ -6,9 +6,15 @@ type Props = {
   token: Token;
   onTokenChange: (t: Token) => void;
   excludeSymbol?: string;
+  balance?: string;
+  usdValue?: string;
+  noRoute?: boolean;
 };
 
-const SwapToSection = ({ value, token, onTokenChange, excludeSymbol }: Props) => {
+const SwapToSection = ({
+  value, token, onTokenChange, excludeSymbol,
+  balance = '—', usdValue, noRoute,
+}: Props) => {
   return (
     <div
       className="relative rounded-lg px-5 pt-5 pb-4"
@@ -18,39 +24,43 @@ const SwapToSection = ({ value, token, onTokenChange, excludeSymbol }: Props) =>
         minHeight: 120,
       }}
     >
-      {/* Row 1: TO label + balance */}
+      {/* Row 1 */}
       <div className="flex items-center justify-between mb-3">
-        <span
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}
-        >
+        <span className="text-xs font-bold uppercase tracking-widest"
+          style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}>
           To
         </span>
         <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-          Balance: 450 {token.symbol}
+          Balance: {balance} {token.symbol}
         </span>
       </div>
 
-      {/* Row 2: Output + token selector */}
+      {/* Row 2 */}
       <div className="flex items-center gap-3">
-        <span
-          className="font-bold flex-1 min-w-0"
-          style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: 30, color: '#E5E2E3' }}
-        >
-          {value || '0.0'}
-        </span>
+        {noRoute ? (
+          <span className="text-sm flex-1" style={{ color: '#FF6464', fontFamily: 'Inter' }}>
+            No route found
+          </span>
+        ) : (
+          <span
+            className="font-bold flex-1 min-w-0"
+            style={{
+              fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: 30,
+              color: value === '...' ? '#B9CBBC' : '#E5E2E3',
+            }}
+          >
+            {value || '0.0'}
+          </span>
+        )}
         <TokenSelector selected={token} onChange={onTokenChange} exclude={excludeSymbol} />
       </div>
 
-      {/* Row 3: USD value + price impact */}
-      <div className="flex items-center justify-between mt-2">
-        <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-          ≈ $2,340.50
-        </span>
-        <span className="text-xs font-bold" style={{ color: '#00E38B', fontFamily: 'Inter' }}>
-          Price Impact: -0.21%
-        </span>
-      </div>
+      {/* Row 3: USD value */}
+      {usdValue && !noRoute && (
+        <div className="mt-2">
+          <span className="text-xs" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>{usdValue}</span>
+        </div>
+      )}
     </div>
   );
 };

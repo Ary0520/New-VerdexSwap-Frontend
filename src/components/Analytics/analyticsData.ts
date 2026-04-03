@@ -5,7 +5,7 @@ const seed = (n: number) => {
 };
 
 const walk = (len: number, start: number, volatility: number, trend: number, rng: () => number) =>
-  Array.from({ length: len }, (_, i) => {
+  Array.from({ length: len }, (_) => {
     start = start * (1 + trend) + (rng() - 0.5) * volatility * start;
     return Math.max(0, parseFloat(start.toFixed(2)));
   });
@@ -17,7 +17,7 @@ export const DAYS_30 = Array.from({ length: 30 }, (_, i) => {
 });
 
 // ── Protocol-level series ─────────────────────────────────────────────────────
-const r1 = seed(42), r2 = seed(77), r3 = seed(13), r4 = seed(99);
+const r1 = seed(42), r2 = seed(77);
 
 export const TVL_SERIES       = walk(30, 195, 0.04, 0.003, r1);   // $M
 export const VOLUME_SERIES    = walk(30, 52,  0.35, 0.001, r2);   // $M

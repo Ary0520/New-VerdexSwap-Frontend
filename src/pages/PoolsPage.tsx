@@ -3,7 +3,7 @@ import SwapTopNav from '../components/Swap/SwapTopNav';
 import AppSidebar from '../components/Swap/AppSidebar';
 import PoolsTable from '../components/Pools/PoolsTable';
 import AddLiquidityModal from '../components/Pools/AddLiquidityModal';
-import { POOLS } from '../components/Pools/poolsData';
+import { PAIRS, type PairKey } from '../lib/contracts';
 
 const PoolsPage = () => {
   const [createModal, setCreateModal] = useState(false);
@@ -94,9 +94,8 @@ const PoolsPage = () => {
         </div>
       </main>
 
-      {/* Create Pool modal — reuses Add Liquidity with first pool as placeholder */}
       {createModal && (
-        <AddLiquidityModal pool={POOLS[0]} onClose={() => setCreateModal(false)} />
+        <AddLiquidityModal pairKey={(Object.keys(PAIRS)[0] as PairKey)} onClose={() => setCreateModal(false)} />
       )}
     </div>
   );
