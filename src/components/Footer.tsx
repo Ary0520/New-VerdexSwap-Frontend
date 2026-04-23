@@ -2,7 +2,10 @@ const Footer = () => (
   <footer className="bg-[#0E0E0F] w-full pt-20 pb-10 px-8 border-t border-[#ffffff10]">
     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
       <div className="col-span-1">
-        <div className="text-xl font-bold text-[#00FF9D] mb-4 font-headline">VerdexSwap</div>
+        <div className="flex items-center gap-2 text-xl font-bold text-[#00FF9D] mb-4 font-headline">
+          <img src="/logo.jpg" alt="VerdexSwap" className="rounded-md" style={{ width: 28, height: 28, objectFit: 'cover' }} />
+          VerdexSwap
+        </div>
         <p className="text-sm text-[#B9CBBC] mb-2">The first AMM with a self-sustaining Impermanent Loss Shield.</p>
         <p className="text-xs text-[#B9CBBC] opacity-50 mb-6">Currently on Arbitrum Sepolia testnet.</p>
         <div className="flex gap-4">

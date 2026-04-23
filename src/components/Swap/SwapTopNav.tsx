@@ -13,10 +13,9 @@ const SwapTopNav = () => {
       style={{ background: '#131314', backdropFilter: 'blur(24px)' }}
     >
       {/* Logo */}
-      <div
-        className="text-2xl font-black tracking-tighter font-headline"
-        style={{ color: '#00FF9D', letterSpacing: '-0.05em' }}
-      >
+      <div className="flex items-center gap-2 text-2xl font-black tracking-tighter font-headline"
+        style={{ color: '#00FF9D', letterSpacing: '-0.05em' }}>
+        <img src="/logo.jpg" alt="VerdexSwap" className="rounded-md" style={{ width: 30, height: 30, objectFit: 'cover' }} />
         VerdexSwap
       </div>
 

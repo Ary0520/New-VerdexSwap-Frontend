@@ -23,7 +23,8 @@ const TopNavBar = () => {
       <div className="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="text-2xl font-black tracking-tighter text-[#00FF9D] font-headline">
+          className="flex items-center gap-2 text-2xl font-black tracking-tighter text-[#00FF9D] font-headline">
+          <img src="/logo.jpg" alt="VerdexSwap" className="rounded-md" style={{ width: 32, height: 32, objectFit: 'cover' }} />
           VerdexSwap
         </button>
         <div className="hidden md:flex gap-8 items-center">
