@@ -9,6 +9,8 @@ import { ERC20_ABI } from '../lib/abis/erc20';
 import { PAIR_ABI } from '../lib/abis/pair';
 import { ADDRESSES, TOKENS, PAIRS, type TokenSymbol, getPairAddress } from '../lib/contracts';
 
+import { decodeError } from '../lib/errors';
+
 // ── Contract instances ────────────────────────────────────────────────────────
 const routerContract = getContract({
   client, chain: arbitrumSepolia,
@@ -177,12 +179,15 @@ export function usePriceImpact(
   const pairEntry    = pairAddr ? Object.values(PAIRS).find(p => p.address === pairAddr) : null;
   const fromIsToken0 = pairEntry?.token0 === fromSymbol;
 
-  const pairContract = pairAddr
-    ? getContract({ client, chain: arbitrumSepolia, address: pairAddr, abi: PAIR_ABI })
-    : null;
+  const pairContract = getContract({
+    client,
+    chain: arbitrumSepolia,
+    address: (pairAddr ?? '0x0000000000000000000000000000000000000000') as `0x${string}`,
+    abi: PAIR_ABI,
+  });
 
   const { data } = useReadContract({
-    contract: pairContract!,
+    contract: pairContract,
     method: 'getReserves',
     params: [],
     queryOptions: { enabled: !!pairAddr, refetchInterval: 10_000 },
@@ -289,8 +294,7 @@ export function useExecuteSwap() {
       setStatus('success');
     } catch (e: unknown) {
       setStatus('error');
-      const msg = e instanceof Error ? e.message : 'Transaction failed';
-      setError(msg.includes('0x') ? msg.split('(')[0].trim() : msg);
+      setError(decodeError(e));
     }
   };
 

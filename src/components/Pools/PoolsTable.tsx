@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { PAIRS, type PairKey } from '../../lib/contracts';
 import { usePairData } from '../../hooks/usePools';
+import { usePoolDayData } from '../../hooks/useSubgraph';
 import TierBadge from './TierBadge';
-import type { PoolTier } from './poolsData';
+import type { PoolTier } from '../../types/pool';
 import PoolRowExpanded from './PoolRowExpanded';
 import AddLiquidityModal from './AddLiquidityModal';
 import RemoveLiquidityModal from './RemoveLiquidityModal';
@@ -57,6 +58,19 @@ const PoolRow = ({
   const tvlUsd     = isUsdQuote ? parseFloat(d.reserve1Fmt) * 2 : 0;
   const vaultUsd   = parseFloat(d.usdcReserveFmt);
 
+  // 24h volume + APR from subgraph (last 2 days to get yesterday's volume)
+  const pair = PAIRS[pairKey];
+  const { data: dayData, loading: dayLoading } = usePoolDayData(pair.address.toLowerCase(), 2);
+
+  // Most recent day's volume
+  const vol24h = dayData.length > 0 ? parseFloat(dayData[dayData.length - 1].volumeUSD) : null;
+
+  // Fee APR: (24h fees / TVL) * 365 * 100
+  // 24h fees = vol24h * (lpFeeBps / 10000)
+  const feeApr = vol24h !== null && tvlUsd > 0
+    ? ((vol24h * (d.lpFeeBps / 10000)) / tvlUsd) * 365 * 100
+    : null;
+
   return (
     <div style={{
       background: isExpanded ? 'rgba(0,255,157,0.02)' : index % 2 === 0 ? '#131314' : 'rgba(255,255,255,0.01)',
@@ -64,7 +78,7 @@ const PoolRow = ({
     }}>
       <div
         className="grid items-center px-6 py-4 cursor-pointer"
-        style={{ gridTemplateColumns: '1.2fr 110px 100px 120px 160px 40px' }}
+        style={{ gridTemplateColumns: '1.2fr 110px 90px 90px 80px 120px 150px 40px' }}
         onClick={onToggle}
       >
         {/* Pool */}
@@ -88,6 +102,19 @@ const PoolRow = ({
         {/* TVL */}
         <span className="text-sm font-medium" style={{ color: '#E5E2E3', fontFamily: 'Inter' }}>
           {d.isLoading ? '…' : fmtUsd(tvlUsd)}
+        </span>
+
+        {/* 24h Volume — subgraph */}
+        <span className="text-sm font-medium" style={{ color: '#568DFF', fontFamily: 'Inter' }}>
+          {dayLoading ? '…' : vol24h !== null ? fmtUsd(vol24h) : '—'}
+        </span>
+
+        {/* Fee APR — derived from volume + TVL */}
+        <span className="text-sm font-bold" style={{
+          color: feeApr !== null ? (feeApr > 20 ? '#00FF9D' : feeApr > 5 ? '#56FFA8' : '#B9CBBC') : '#3B4A3F',
+          fontFamily: 'Inter',
+        }}>
+          {dayLoading ? '…' : feeApr !== null ? feeApr.toFixed(1) + '%' : '—'}
         </span>
 
         {/* Vault Reserve */}
@@ -151,13 +178,15 @@ const PoolsTable = () => {
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="grid items-center px-6 py-3 text-xs font-bold uppercase"
           style={{
-            gridTemplateColumns: '1.2fr 110px 100px 120px 160px 40px',
+            gridTemplateColumns: '1.2fr 110px 90px 90px 80px 120px 150px 40px',
             background: '#1C1B1C', color: '#B9CBBC', fontFamily: 'Inter',
             letterSpacing: '0.08em', borderBottom: '1px solid rgba(255,255,255,0.06)',
           }}>
           <span>Pool</span>
           <span>Tier</span>
           <span>TVL</span>
+          <span>24h Vol</span>
+          <span>APR</span>
           <span>Vault Reserve</span>
           <span>Utilization</span>
           <span />

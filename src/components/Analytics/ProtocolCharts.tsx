@@ -2,99 +2,89 @@ import { useState } from 'react';
 import ChartCard from './ChartCard';
 import LineChart from './LineChart';
 import BarChart from './BarChart';
-import { DAYS_30, TVL_SERIES, VOLUME_SERIES, FEES_CUMULATIVE, IL_PAYOUT_CUMULATIVE } from './analyticsData';
+import { useProtocolChartData } from '../../hooks/useAnalytics';
 
-type TimeRange = '24h' | '7d' | '30d';
+type TimeRange = '7d' | '30d';
 
-const slice = (data: number[], range: TimeRange) => {
-  if (range === '24h') return data.slice(-1);
-  if (range === '7d')  return data.slice(-7);
-  return data;
-};
-const sliceLabels = (labels: string[], range: TimeRange) => {
-  if (range === '24h') return labels.slice(-1);
-  if (range === '7d')  return labels.slice(-7);
-  return labels;
-};
+const RANGE_DAYS: Record<TimeRange, number> = { '7d': 7, '30d': 30 };
+
+const EmptyChart = ({ height = 160 }: { height?: number }) => (
+  <div className="flex flex-col items-center justify-center gap-2"
+    style={{ height, background: 'rgba(255,255,255,0.02)', borderRadius: 8 }}>
+    <span className="material-symbols-outlined" style={{ color: '#3B4A3F', fontSize: 24 }}>bar_chart</span>
+    <span className="text-xs" style={{ color: '#3B4A3F', fontFamily: 'Inter' }}>
+      Subgraph syncing — data will appear shortly
+    </span>
+  </div>
+);
 
 const ProtocolCharts = () => {
-  const [tvlRange,  setTvlRange]  = useState<TimeRange>('30d');
-  const [volRange,  setVolRange]  = useState<TimeRange>('30d');
-  const [feeRange,  setFeeRange]  = useState<TimeRange>('30d');
-  const [ilRange,   setIlRange]   = useState<TimeRange>('30d');
+  const [range, setRange] = useState<TimeRange>('30d');
+  const { labels, volumes, fees, cumulativeFees, loading, hasData } = useProtocolChartData(RANGE_DAYS[range]);
+
+  const sliced = (arr: number[]) => arr.slice(-RANGE_DAYS[range]);
+  const slicedLabels = labels.slice(-RANGE_DAYS[range]);
+
+  const latestVol  = volumes.length > 0 ? volumes[volumes.length - 1] : 0;
+  const latestFees = cumulativeFees.length > 0 ? cumulativeFees[cumulativeFees.length - 1] : 0;
+
+  function fmtUsd(n: number) {
+    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+    if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
+    return '$' + n.toFixed(2);
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
-      {/* TVL */}
-      <ChartCard
-        title="Total Value Locked"
-        value={`$${TVL_SERIES[TVL_SERIES.length - 1].toFixed(1)}M`}
-        change="+3.4%"
-        changePositive
-        timeRange={tvlRange}
-        onTimeRange={setTvlRange}
-      >
-        <LineChart
-          data={slice(TVL_SERIES, tvlRange)}
-          labels={sliceLabels(DAYS_30, tvlRange)}
-          color="#00FF9D"
-          unit="$M"
-          height={160}
-          gradientId="tvlGrad"
-        />
-      </ChartCard>
-
       {/* Volume */}
       <ChartCard
-        title="Trading Volume"
-        subtitle="Daily swap volume"
-        value={`$${VOLUME_SERIES[VOLUME_SERIES.length - 1].toFixed(1)}M`}
-        timeRange={volRange}
-        onTimeRange={setVolRange}
+        title="Daily Trading Volume"
+        subtitle="Swap volume per day"
+        value={hasData ? fmtUsd(latestVol) : undefined}
+        timeRange={range as any}
+        onTimeRange={r => setRange(r as TimeRange)}
       >
-        <BarChart
-          data={slice(VOLUME_SERIES, volRange)}
-          labels={sliceLabels(DAYS_30, volRange)}
-          color="#568DFF"
-          unit="$M"
-          height={160}
-        />
+        {loading ? <EmptyChart /> : hasData
+          ? <BarChart data={sliced(volumes)} labels={slicedLabels} color="#568DFF" unit="$M" height={160} />
+          : <EmptyChart />}
       </ChartCard>
 
       {/* Cumulative Fees */}
       <ChartCard
         title="Cumulative Fees Generated"
         subtitle="All fee tiers combined"
-        value={`$${FEES_CUMULATIVE[FEES_CUMULATIVE.length - 1].toFixed(2)}M`}
-        timeRange={feeRange}
-        onTimeRange={setFeeRange}
+        value={hasData ? fmtUsd(latestFees) : undefined}
+        timeRange={range as any}
+        onTimeRange={r => setRange(r as TimeRange)}
       >
-        <LineChart
-          data={slice(FEES_CUMULATIVE, feeRange)}
-          labels={sliceLabels(DAYS_30, feeRange)}
-          color="#56FFA8"
-          unit="$M"
-          height={160}
-          gradientId="feeGrad"
-        />
+        {loading ? <EmptyChart /> : hasData
+          ? <LineChart data={sliced(cumulativeFees)} labels={slicedLabels} color="#56FFA8" unit="$M" height={160} gradientId="feeGrad" />
+          : <EmptyChart />}
       </ChartCard>
 
-      {/* IL Payouts */}
+      {/* Daily Fees */}
       <ChartCard
-        title="Cumulative IL Payouts"
-        subtitle="Total paid to LPs from IL Shield"
-        value={`$${IL_PAYOUT_CUMULATIVE[IL_PAYOUT_CUMULATIVE.length - 1].toFixed(2)}M`}
-        timeRange={ilRange}
-        onTimeRange={setIlRange}
+        title="Daily Fees"
+        subtitle="Fee revenue per day"
+        timeRange={range as any}
+        onTimeRange={r => setRange(r as TimeRange)}
       >
-        <LineChart
-          data={slice(IL_PAYOUT_CUMULATIVE, ilRange)}
-          labels={sliceLabels(DAYS_30, ilRange)}
-          color="#FFB400"
-          unit="$M"
-          height={160}
-          gradientId="ilGrad"
-        />
+        {loading ? <EmptyChart /> : hasData
+          ? <BarChart data={sliced(fees)} labels={slicedLabels} color="#56FFA8" unit="$M" height={160} />
+          : <EmptyChart />}
+      </ChartCard>
+
+      {/* Volume vs Fees ratio */}
+      <ChartCard
+        title="Fee Rate"
+        subtitle="Daily fees as % of volume"
+        timeRange={range as any}
+        onTimeRange={r => setRange(r as TimeRange)}
+      >
+        {loading ? <EmptyChart /> : hasData ? (() => {
+          const feeRate = volumes.map((v, i) => v > 0 ? (fees[i] / v) * 100 : 0);
+          return <LineChart data={sliced(feeRate)} labels={slicedLabels} color="#FFB400" unit="%" height={160} gradientId="feeRateGrad" />;
+        })() : <EmptyChart />}
       </ChartCard>
     </div>
   );

@@ -1,0 +1,3 @@
+[
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"pair","type":"address"},{"indexed":true,"internalType":"address","name":"feeToken","type":"address"},{"indexed":false,"internalType":"uint256","name":"rawAmountIn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"usdcOut","type":"uint256"},{"indexed":true,"internalType":"address","name":"caller","type":"address"},{"indexed":false,"internalType":"uint256","name":"callerBonus","type":"uint256"}],"name":"Converted","type":"event"}
+]

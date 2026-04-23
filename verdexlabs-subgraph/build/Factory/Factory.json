@@ -1,0 +1,140 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token0",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token1",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "pair",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "tier",
+        "type": "uint8"
+      }
+    ],
+    "name": "PairCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint8",
+        "name": "tier",
+        "type": "uint8"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "vaultFeeBps",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "treasuryFeeBps",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lpFeeBps",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxCoverageBps",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Factory.TierConfig",
+        "name": "config",
+        "type": "tuple"
+      }
+    ],
+    "name": "TierConfigUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pair",
+        "type": "address"
+      }
+    ],
+    "name": "getPairConfig",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "vaultFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "treasuryFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lpFeeBps",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxCoverageBps",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pair",
+        "type": "address"
+      }
+    ],
+    "name": "getPairTier",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "allPairsLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

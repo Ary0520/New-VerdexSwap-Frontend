@@ -1,4 +1,4 @@
-import type { PoolTier } from './poolsData';
+import type { PoolTier } from '../../types/pool';
 
 const tierStyles: Record<PoolTier, { bg: string; border: string; color: string }> = {
   Stable: {

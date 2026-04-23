@@ -11,6 +11,8 @@ import { ERC20_ABI } from '../lib/abis/erc20';
 import { POSITION_MANAGER_ABI } from '../lib/abis/positionManager';
 import { ADDRESSES, TOKENS, PAIRS, type PairKey, type TokenSymbol } from '../lib/contracts';
 
+import { decodeError } from '../lib/errors';
+
 // ── Contract helpers ──────────────────────────────────────────────────────────
 function pairContract(addr: `0x${string}`) {
   return getContract({ client, chain: arbitrumSepolia, address: addr, abi: PAIR_ABI });
@@ -218,7 +220,7 @@ export function useAddLiquidity() {
       setStatus('success');
     } catch (e: unknown) {
       setStatus('error');
-      setError(e instanceof Error ? e.message.split('(')[0].trim() : 'Transaction failed');
+      setError(decodeError(e));
     }
   };
 
@@ -279,7 +281,7 @@ export function useRemoveLiquidity() {
       setStatus('success');
     } catch (e: unknown) {
       setStatus('error');
-      setError(e instanceof Error ? e.message.split('(')[0].trim() : 'Transaction failed');
+      setError(decodeError(e));
     }
   };
 
@@ -336,3 +338,4 @@ export function useAddLiquidityQuote(pairKey: PairKey, amountA: string) {
 
   return { amountB, ratio, estimatedLp, t0, t1 };
 }
+

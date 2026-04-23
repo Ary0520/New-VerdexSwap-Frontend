@@ -1,0 +1,157 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Factory
+    network: arbitrum-sepolia
+    source:
+      address: "0x23942d68C74f80cE259a4dA31a59856fFde5425e"
+      abi: Factory
+      startBlock: 254034109
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Token
+        - Protocol
+      abis:
+        - name: Factory
+          file: Factory\Factory.json
+        - name: Pair
+          file: Factory\Pair.json
+      eventHandlers:
+        - event: PairCreated(indexed address,indexed address,address,uint8)
+          handler: handlePairCreated
+      file: Factory\Factory.wasm
+  - kind: ethereum
+    name: Router
+    network: arbitrum-sepolia
+    source:
+      address: "0x8f19EF21EDe7d881003FCa1e50285A113915Cb5f"
+      abi: Router
+      startBlock: 254034109
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Swap
+        - LiquidityEvent
+        - Pool
+        - Protocol
+        - PoolDayData
+        - ProtocolDayData
+      abis:
+        - name: Router
+          file: Router\Router.json
+        - name: Pair
+          file: Router\Pair.json
+      eventHandlers:
+        - event: SwapExecuted(indexed address,indexed address,uint256,uint256)
+          handler: handleSwapExecuted
+        - event: LiquidityAdded(indexed address,indexed address,uint256)
+          handler: handleLiquidityAdded
+        - event: LiquidityRemoved(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleLiquidityRemoved
+      file: Router\Router.wasm
+  - kind: ethereum
+    name: ILShieldVault
+    network: arbitrum-sepolia
+    source:
+      address: "0x3e0A64d381fBc6cAc7683bBf6F1480742B6fF265"
+      abi: ILShieldVault
+      startBlock: 254034109
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - StakingEvent
+        - UserStakingPosition
+        - ILPayout
+        - Pool
+        - Protocol
+      abis:
+        - name: ILShieldVault
+          file: ILShieldVault\ILShieldVault.json
+      eventHandlers:
+        - event: Staked(indexed address,indexed address,uint256,uint256)
+          handler: handleStaked
+        - event: Unstaked(indexed address,indexed address,uint256)
+          handler: handleUnstaked
+        - event: PayoutIssued(indexed address,indexed address,uint256,uint256)
+          handler: handlePayoutIssued
+        - event: FeeHarvested(indexed address,indexed address,uint256)
+          handler: handleFeeHarvested
+      file: ILShieldVault\ILShieldVault.wasm
+  - kind: ethereum
+    name: FeeConverter
+    network: arbitrum-sepolia
+    source:
+      address: "0x61a99BbEff17485e4DbE92b86a213F32fabE5aeE"
+      abi: FeeConverter
+      startBlock: 254034109
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - FeeConversion
+        - Pool
+        - Protocol
+      abis:
+        - name: FeeConverter
+          file: FeeConverter\FeeConverter.json
+      eventHandlers:
+        - event: Converted(indexed address,indexed address,uint256,uint256,indexed address,uint256)
+          handler: handleConverted
+      file: FeeConverter\FeeConverter.wasm
+  - kind: ethereum
+    name: ILPositionManager
+    network: arbitrum-sepolia
+    source:
+      address: "0xCAa5239e6266F4aEc2A78E10429Ab48B0E77F72B"
+      abi: ILPositionManager
+      startBlock: 254034109
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - UserILPosition
+      abis:
+        - name: ILPositionManager
+          file: ILPositionManager\ILPositionManager.json
+      eventHandlers:
+        - event: PositionRecorded(indexed address,indexed address,uint256,uint256)
+          handler: handlePositionRecorded
+        - event: PositionReduced(indexed address,indexed address,uint256,uint256)
+          handler: handlePositionReduced
+        - event: PositionCleared(indexed address,indexed address)
+          handler: handlePositionCleared
+      file: ILPositionManager\ILPositionManager.wasm
+templates:
+  - kind: ethereum
+    name: Pair
+    network: arbitrum-sepolia
+    source:
+      abi: Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - PoolDayData
+      abis:
+        - name: Pair
+          file: Pair\Pair.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleSync
+      file: templates\Pair\Pair.wasm

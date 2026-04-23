@@ -1,0 +1,157 @@
+# ── Token ─────────────────────────────────────────────────────────────────────
+type Token @entity(immutable: false) {
+  id: ID!          # token address (lowercase)
+  symbol: String!
+  decimals: Int!
+}
+
+# ── Pool (one per pair) ────────────────────────────────────────────────────────
+type Pool @entity(immutable: false) {
+  id: ID!                    # pair address (lowercase)
+  token0: Token!
+  token1: Token!
+  tier: Int!                 # 0=Stable 1=BlueChip 2=Volatile
+  lpFeeBps: BigInt!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+  totalSupply: BigDecimal!
+  # cumulative totals
+  totalVolumeToken0: BigDecimal!
+  totalVolumeToken1: BigDecimal!
+  totalVolumeUSD: BigDecimal!
+  totalFeesUSD: BigDecimal!
+  txCount: BigInt!
+  # vault
+  vaultUsdcReserve: BigDecimal!
+  vaultTotalPaidOut: BigDecimal!
+  vaultTotalFeesIn: BigDecimal!
+  # time-series
+  dayData: [PoolDayData!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+  liquidityEvents: [LiquidityEvent!]! @derivedFrom(field: "pool")
+  createdAt: BigInt!
+}
+
+# ── Protocol singleton ─────────────────────────────────────────────────────────
+type Protocol @entity(immutable: false) {
+  id: ID!                    # "verdexswap"
+  totalVolumeUSD: BigDecimal!
+  totalFeesUSD: BigDecimal!
+  totalILPayoutsUSD: BigDecimal!
+  totalFeeConversionsUSD: BigDecimal!
+  txCount: BigInt!
+  poolCount: Int!
+}
+
+# ── Daily snapshots ────────────────────────────────────────────────────────────
+type PoolDayData @entity(immutable: false) {
+  id: ID!                    # pool-address + "-" + dayId
+  pool: Pool!
+  date: Int!                 # unix timestamp of day start (UTC)
+  volumeToken0: BigDecimal!
+  volumeToken1: BigDecimal!
+  volumeUSD: BigDecimal!
+  feesUSD: BigDecimal!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+  txCount: BigInt!
+}
+
+type ProtocolDayData @entity(immutable: false) {
+  id: ID!                    # dayId as string
+  date: Int!
+  volumeUSD: BigDecimal!
+  feesUSD: BigDecimal!
+  txCount: BigInt!
+}
+
+# ── Swap ───────────────────────────────────────────────────────────────────────
+type Swap @entity(immutable: true) {
+  id: ID!                    # txHash + "-" + logIndex
+  pool: Pool!
+  sender: Bytes!
+  recipient: Bytes!
+  amount0In: BigDecimal!
+  amount1In: BigDecimal!
+  amount0Out: BigDecimal!
+  amount1Out: BigDecimal!
+  amountUSD: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+# ── Liquidity events ───────────────────────────────────────────────────────────
+type LiquidityEvent @entity(immutable: true) {
+  id: ID!                    # txHash + "-" + logIndex
+  type: String!              # "add" | "remove"
+  pool: Pool!
+  user: Bytes!
+  amount0: BigDecimal!
+  amount1: BigDecimal!
+  liquidity: BigDecimal!
+  ilPayout: BigDecimal!      # only on remove; 0 otherwise
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+# ── IL positions (per user per pool) ──────────────────────────────────────────
+type UserILPosition @entity(immutable: false) {
+  id: ID!                    # user + "-" + pool
+  user: Bytes!
+  pool: Pool!
+  liquidity: BigDecimal!
+  valueAtDeposit: BigDecimal!  # in USDC (6 dec)
+  entryTimestamp: BigInt!
+  active: Boolean!
+}
+
+# ── Vault staking ──────────────────────────────────────────────────────────────
+type StakingEvent @entity(immutable: true) {
+  id: ID!                    # txHash + "-" + logIndex
+  type: String!              # "stake" | "unstake" | "harvest"
+  user: Bytes!
+  pool: Bytes!               # pair address
+  amountUSDC: BigDecimal!
+  shares: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+type UserStakingPosition @entity(immutable: false) {
+  id: ID!                    # user + "-" + pool
+  user: Bytes!
+  pool: Bytes!
+  amountUSDC: BigDecimal!
+  shares: BigDecimal!
+  totalEarned: BigDecimal!
+  active: Boolean!
+}
+
+# ── IL payouts ─────────────────────────────────────────────────────────────────
+type ILPayout @entity(immutable: true) {
+  id: ID!
+  pool: Pool!
+  user: Bytes!
+  amountUSDC: BigDecimal!
+  coverageBps: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+# ── Fee conversions ────────────────────────────────────────────────────────────
+type FeeConversion @entity(immutable: true) {
+  id: ID!
+  pool: Pool!
+  feeToken: Bytes!
+  rawAmountIn: BigDecimal!
+  usdcOut: BigDecimal!
+  callerBonus: BigDecimal!
+  caller: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}

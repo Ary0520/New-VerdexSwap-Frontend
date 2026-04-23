@@ -54,18 +54,19 @@ const AppSidebar = () => {
           className="rounded-lg p-4 flex flex-col gap-2"
           style={{ background: '#1C1B1C', border: '1px solid rgba(59,74,63,0.2)' }}
         >
-          <span
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}
-          >
-            Status
+          <span className="text-xs font-semibold uppercase tracking-widest"
+            style={{ color: '#B9CBBC', fontFamily: 'Inter', letterSpacing: '0.1em' }}>
+            Network
           </span>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#56FFA8' }} />
+            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#56FFA8' }} />
             <span className="text-xs" style={{ color: '#E5E2E3', fontFamily: 'Inter' }}>
-              Mainnet Syncing
+              Arbitrum Sepolia
             </span>
           </div>
+          <span className="text-xs" style={{ color: '#3B4A3F', fontFamily: 'Inter', fontSize: 10 }}>
+            Testnet · Chain 421614
+          </span>
         </div>
       </div>
     </aside>

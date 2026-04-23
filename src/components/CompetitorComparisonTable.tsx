@@ -1,9 +1,11 @@
-
-
-const CompetitorComparisonTable = () => {
-  return (
-    <section className="py-24 px-8">
-      <div className="max-w-7xl mx-auto overflow-x-auto">
+const CompetitorComparisonTable = () => (
+  <section className="py-24 px-8">
+    <div className="max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-headline font-black mb-4">Why VerdexSwap is different.</h2>
+        <p className="text-on-surface-variant">Not different in marketing. Different in architecture.</p>
+      </div>
+      <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-outline-variant/50">
@@ -14,35 +16,26 @@ const CompetitorComparisonTable = () => {
             </tr>
           </thead>
           <tbody className="text-sm">
-            <tr className="border-b border-outline-variant/20 hover:bg-surface-container-high/20 transition-colors">
-              <td className="py-6 px-4 font-bold">IL Protection</td>
-              <td className="text-center text-error"><span className="material-symbols-outlined" data-icon="close">close</span></td>
-              <td className="text-center text-secondary">V3 Only</td>
-              <td className="text-center text-primary-container font-bold">Native &amp; Sustainable</td>
-            </tr>
-            <tr className="border-b border-outline-variant/20 hover:bg-surface-container-high/20 transition-colors">
-              <td className="py-6 px-4 font-bold">Fee Tiers</td>
-              <td className="text-center">Single (0.3%)</td>
-              <td className="text-center">Fixed</td>
-              <td className="text-center text-primary-container font-bold">Triple-Dynamic</td>
-            </tr>
-            <tr className="border-b border-outline-variant/20 hover:bg-surface-container-high/20 transition-colors">
-              <td className="py-6 px-4 font-bold">Oracle Source</td>
-              <td className="text-center">Spot</td>
-              <td className="text-center">Chainlink</td>
-              <td className="text-center text-primary-container font-bold">Resilient TWAP</td>
-            </tr>
-            <tr className="border-b border-outline-variant/20 hover:bg-surface-container-high/20 transition-colors">
-              <td className="py-6 px-4 font-bold">Stable LP Yield</td>
-              <td className="text-center">Fee Only</td>
-              <td className="text-center">Fee Only</td>
-              <td className="text-center text-primary-container font-bold">Fee + Insurance Premium</td>
-            </tr>
+            {[
+              { feature: 'IL Protection',       uni: '✗ None',          ban: 'Token-funded (dilutive)', vdx: 'Fee-funded USDC payout' },
+              { feature: 'Oracle Type',         uni: 'Spot price',       ban: 'Chainlink',               vdx: 'Manipulation-resistant TWAP' },
+              { feature: 'Fee Tiers',           uni: 'Single (0.3%)',    ban: 'Fixed',                   vdx: '3 tiers by asset class' },
+              { feature: 'Payout Mechanism',    uni: '—',                ban: 'Manual claim',            vdx: 'Automatic at withdrawal' },
+              { feature: 'Protocol Take Rate',  uni: '~17% of fees',     ban: 'Variable',                vdx: '0% (testnet phase)' },
+              { feature: 'Vault Sustainability', uni: '—',               ban: 'Token inflation',         vdx: 'Self-sustaining fee loop' },
+            ].map(row => (
+              <tr key={row.feature} className="border-b border-outline-variant/20 hover:bg-surface-container-high/20 transition-colors">
+                <td className="py-5 px-4 font-bold">{row.feature}</td>
+                <td className="text-center py-5 px-4 text-on-surface-variant">{row.uni}</td>
+                <td className="text-center py-5 px-4 text-on-surface-variant">{row.ban}</td>
+                <td className="text-center py-5 px-4 text-primary-container font-bold">{row.vdx}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default CompetitorComparisonTable;

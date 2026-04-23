@@ -1,30 +1,23 @@
-
-
-const SocialProofTrust = () => {
-  return (
-    <section className="py-24 px-8 bg-surface-container-lowest">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 items-center opacity-60">
-          <div className="flex items-center gap-2 justify-center">
-            <span className="material-symbols-outlined text-2xl" data-icon="search">search</span>
-            <span className="font-headline font-bold">ETHERSCAN</span>
+const SocialProofTrust = () => (
+  <section className="py-16 px-8 bg-surface-container-lowest">
+    <div className="max-w-7xl mx-auto">
+      <p className="text-center text-xs font-headline uppercase tracking-widest text-on-surface-variant mb-10">Built in public. Verifiable on-chain.</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-12 items-center">
+        {[
+          { icon: 'search',   label: 'Arbiscan',       sub: 'All contracts verified' },
+          { icon: 'code',     label: 'Open Source',    sub: 'GitHub repository public' },
+          { icon: 'verified', label: 'Audit Pending',  sub: 'Testnet phase — pre-audit' },
+          { icon: 'group',    label: 'Community',      sub: 'Discord & governance' },
+        ].map(item => (
+          <div key={item.label} className="flex flex-col items-center gap-2 text-center opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
+            <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+            <span className="font-headline font-bold text-sm">{item.label}</span>
+            <span className="text-xs text-on-surface-variant">{item.sub}</span>
           </div>
-          <div className="flex items-center gap-2 justify-center">
-            <span className="material-symbols-outlined text-2xl" data-icon="code">code</span>
-            <span className="font-headline font-bold">GITHUB</span>
-          </div>
-          <div className="flex items-center gap-2 justify-center">
-            <span className="material-symbols-outlined text-2xl" data-icon="verified">verified</span>
-            <span className="font-headline font-bold">AUDITED</span>
-          </div>
-          <div className="flex items-center gap-2 justify-center">
-            <span className="material-symbols-outlined text-2xl" data-icon="group">group</span>
-            <span className="font-headline font-bold">COMMUNITY</span>
-          </div>
-        </div>
+        ))}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default SocialProofTrust;

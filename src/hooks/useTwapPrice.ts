@@ -36,3 +36,37 @@ export function useTwapPrice(pairAddress: string | undefined, tokenASymbol: Toke
     isStale: isError,
   };
 }
+
+// ── Current LP position value in USD using TWAP ───────────────────────────────
+// Given a user's share of pool reserves and the TWAP price of token0 in terms
+// of token1 (which is USDC for most pairs), compute current USD value.
+// token0Amount: user's token0 balance (already formatted, e.g. 0.5 WETH)
+// token1Amount: user's token1 balance (already formatted, e.g. 1200 USDC)
+// For USDC-quoted pairs: currentValueUSD = token0Amount * twapPrice + token1Amount
+// For WETH/DAI: DAI ≈ $1, same formula applies
+export function useCurrentPositionValueUSD(
+  pairAddress: string | undefined,
+  token0Symbol: TokenSymbol,
+  token0Amount: number,   // already in human units
+  token1Amount: number,   // already in human units (USDC or DAI ≈ $1)
+  token1IsStable: boolean, // true if token1 is USDC or DAI
+) {
+  // Get TWAP price of token0 expressed in token1 units
+  const { price: twapPrice, isLoading, isStale } = useTwapPrice(pairAddress, token0Symbol);
+
+  let currentValueUSD = 0;
+  if (token1IsStable && twapPrice > 0) {
+    // token0 value in USD + token1 value in USD (token1 ≈ $1)
+    currentValueUSD = token0Amount * twapPrice + token1Amount;
+  } else if (token1IsStable) {
+    // TWAP not available yet, fall back to token1 only (underestimates)
+    currentValueUSD = token1Amount * 2; // rough 50/50 pool approximation
+  }
+
+  return {
+    currentValueUSD,
+    currentValueFormatted: currentValueUSD > 0 ? currentValueUSD.toFixed(2) : '—',
+    isLoading,
+    isStale,
+  };
+}
