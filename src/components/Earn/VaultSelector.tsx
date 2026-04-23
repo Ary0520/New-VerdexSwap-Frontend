@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { PAIRS, TOKENS, type PairKey, type TokenSymbol } from '../../lib/contracts';
+import { PAIRS, type PairKey, type TokenSymbol } from '../../lib/contracts';
 
 const TOKEN_COLORS: Record<string, string> = {
   WETH: '#627EEA', USDC: '#2775CA', WBTC: '#F7931A', ARB: '#12AAFF', DAI: '#F5AC37',

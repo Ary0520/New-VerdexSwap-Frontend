@@ -16,7 +16,7 @@ export function useTwapPrice(pairAddress: string | undefined, tokenASymbol: Toke
 
   const { data, isLoading, isError } = useReadContract({
     contract: oracleContract,
-    method: 'function getTWAPForTokens(address pair, address tokenA) view returns (uint256)',
+    method: 'getTWAPForTokens',
     params: [
       (pairAddress ?? '0x0000000000000000000000000000000000000000') as `0x${string}`,
       tokenA.address,

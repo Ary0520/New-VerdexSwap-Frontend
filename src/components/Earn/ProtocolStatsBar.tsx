@@ -41,7 +41,7 @@ const ProtocolStatsBar = () => {
   return (
     <div className="grid grid-cols-4 gap-px rounded-xl overflow-hidden mt-8"
       style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-      {stats.map((stat, i) => (
+      {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1 px-6 py-4"
           style={{ background: '#1C1B1C' }}>
           <div className="flex items-center gap-1.5">

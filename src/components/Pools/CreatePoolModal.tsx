@@ -39,7 +39,6 @@ const CreatePoolModal = ({ onClose }: Props) => {
   const [tokenB, setTokenB] = useState<TokenSymbol>('DAI');
   const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [newPairAddr, setNewPairAddr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const addrA = TOKENS[tokenA]?.address;

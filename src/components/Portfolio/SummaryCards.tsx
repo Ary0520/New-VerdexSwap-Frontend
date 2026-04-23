@@ -1,8 +1,5 @@
-import { PAIRS, type PairKey } from '../../lib/contracts';
 import { useLpPosition, useStakingPosition, usePortfolioSummary } from '../../hooks/usePortfolio';
 import { useActiveAccount } from 'thirdweb/react';
-
-const ALL_PAIRS = Object.keys(PAIRS) as PairKey[];
 
 // Inner component that calls hooks for all pairs and aggregates
 const SummaryCardsInner = () => {

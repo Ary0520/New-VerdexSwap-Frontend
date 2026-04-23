@@ -31,7 +31,7 @@ export function useSwapQuote(
 
   const { data, isLoading, isError } = useReadContract({
     contract: routerContract,
-    method: 'function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[] amounts)',
+    method: 'getAmountsOut',
     params: [parsedAmount, [fromToken.address, toToken.address]],
     queryOptions: {
       enabled: parsedAmount > 0n,

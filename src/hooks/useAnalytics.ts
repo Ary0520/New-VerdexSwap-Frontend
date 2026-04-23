@@ -145,7 +145,7 @@ export function usePoolAnalytics(pairKey: PairKey, days = 30) {
   const dayReserve = dayData.map(d => parseFloat(d.reserve1) * 2); // USDC side * 2
 
   // Fee APR: (daily fees / TVL) * 365 * 100
-  const dayFeeApr = dayData.map((d, i) => {
+  const dayFeeApr = dayData.map((d) => {
     const tvl = parseFloat(d.reserve1) * 2;
     const fee = parseFloat(d.feesUSD);
     return tvl > 0 ? (fee / tvl) * 365 * 100 : 0;
