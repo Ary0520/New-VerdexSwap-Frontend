@@ -44,7 +44,7 @@ const ERROR_MAP: Record<string, string> = {
   // FeeConverter
   'BelowMinimum':            'Accumulated fees are below the minimum conversion threshold ($10 USDC).',
   'ConversionFailed':        'Fee conversion failed — TWAP price may be stale.',
-  'CooldownNotMet':          'Conversion cooldown active — please wait before converting again.',
+  'FeeConverter__CooldownNotMet': 'Conversion cooldown active — please wait before converting again.',
   'NothingToConvert':        'No fees accumulated to convert.',
   'PairNotRegistered':       'This pair is not registered with the FeeConverter.',
   'SlippageExceeded':        'Conversion slippage too high — try again when price is stable.',
