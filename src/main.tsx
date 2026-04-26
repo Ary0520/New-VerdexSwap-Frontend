@@ -9,6 +9,7 @@ import PoolsPage from './pages/PoolsPage.tsx'
 import EarnPage from './pages/EarnPage.tsx'
 import PortfolioPage from './pages/PortfolioPage.tsx'
 import AnalyticsPage from './pages/AnalyticsPage.tsx'
+import FaucetPage from './pages/FaucetPage.tsx'
 import WrongNetworkBanner from './components/shared/WrongNetworkBanner.tsx'
 
 createRoot(document.getElementById('root')!).render(
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/earn" element={<EarnPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/faucet" element={<FaucetPage />} />
         </Routes>
       </BrowserRouter>
     </ThirdwebProvider>
