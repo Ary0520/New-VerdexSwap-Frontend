@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useActiveAccount } from 'thirdweb/react';
+import { useActiveAccount, useActiveWalletChain, useSwitchActiveWalletChain } from 'thirdweb/react';
 import SwapTopNav from '../components/Swap/SwapTopNav';
 import AppSidebar from '../components/Swap/AppSidebar';
 import ConnectPrompt from '../components/shared/ConnectPrompt';
@@ -9,36 +9,30 @@ import {
   getCooldownRemaining,
   formatCooldown,
   FAUCET_AMOUNTS,
-  type FaucetStatus,
 } from '../hooks/useFaucet';
-import { TOKENS, type TokenSymbol } from '../lib/contracts';
+import { TOKENS, CHAIN_ID, type TokenSymbol } from '../lib/contracts';
+import { arbitrumSepolia } from '../lib/thirdweb';
 
-const TOKEN_ICONS: Record<TokenSymbol, string> = {
-  USDC: '💵',
-  WETH: '⟠',
-  WBTC: '₿',
-  ARB:  '🔵',
-  DAI:  '◈',
-};
-
-const TOKEN_COLORS: Record<TokenSymbol, string> = {
-  USDC: '#2775CA',
-  WETH: '#627EEA',
-  WBTC: '#F7931A',
-  ARB:  '#12AAFF',
-  DAI:  '#F5AC37',
+// ── Token metadata ────────────────────────────────────────────────────────────
+const TOKEN_META: Record<TokenSymbol, { color: string; bg: string; icon: string }> = {
+  USDC: { color: '#2775CA', bg: 'rgba(39,117,202,0.12)',  icon: '💵' },
+  WETH: { color: '#627EEA', bg: 'rgba(98,126,234,0.12)',  icon: '⟠'  },
+  WBTC: { color: '#F7931A', bg: 'rgba(247,147,26,0.12)',  icon: '₿'  },
+  ARB:  { color: '#12AAFF', bg: 'rgba(18,170,255,0.12)',  icon: '🔵' },
+  DAI:  { color: '#F5AC37', bg: 'rgba(245,172,55,0.12)',  icon: '◈'  },
 };
 
 const SYMBOLS = Object.keys(TOKENS) as TokenSymbol[];
 
-// ── Single token card ─────────────────────────────────────────────────────────
-function TokenFaucetCard({ symbol }: { symbol: TokenSymbol }) {
+// ── Token card ────────────────────────────────────────────────────────────────
+function TokenCard({ symbol, disabled }: { symbol: TokenSymbol; disabled: boolean }) {
   const account = useActiveAccount();
   const { mint, status, error, txHash, reset } = useMintToken(symbol);
   const { formatted: balance, refetch } = useTokenBalance(symbol);
   const [cooldownMs, setCooldownMs] = useState(0);
+  const meta = TOKEN_META[symbol];
+  const token = TOKENS[symbol];
 
-  // Tick cooldown every second
   useEffect(() => {
     if (!account?.address) return;
     const tick = () => setCooldownMs(getCooldownRemaining(account.address!, symbol));
@@ -47,111 +41,182 @@ function TokenFaucetCard({ symbol }: { symbol: TokenSymbol }) {
     return () => clearInterval(id);
   }, [account?.address, symbol, status]);
 
-  // Refetch balance after success
   useEffect(() => {
-    if (status === 'success') { refetch(); }
+    if (status === 'success') refetch();
   }, [status, refetch]);
 
   const onCooldown = cooldownMs > 0;
   const isPending = status === 'pending';
-  const color = TOKEN_COLORS[symbol];
+  const isSuccess = status === 'success';
+  const isError = status === 'error';
+  const isDisabled = disabled || isPending || onCooldown;
 
   return (
     <div
-      className="rounded-xl p-6 flex flex-col gap-4 transition-all duration-200"
-      style={{ background: '#1C1B1C', border: `1px solid rgba(255,255,255,0.06)` }}
+      className="rounded-2xl overflow-hidden transition-all duration-200"
+      style={{
+        background: '#18181A',
+        border: '1px solid rgba(255,255,255,0.07)',
+        boxShadow: isSuccess ? `0 0 0 1px ${meta.color}44` : undefined,
+      }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0"
-            style={{ background: `${color}22`, border: `1px solid ${color}44` }}
-          >
-            {TOKEN_ICONS[symbol]}
-          </div>
-          <div>
-            <div className="font-headline font-bold text-base" style={{ color: '#E5E2E3' }}>
-              {TOKENS[symbol].name}
-            </div>
-            <div className="text-xs" style={{ color: '#B9CBBC' }}>{symbol}</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xs" style={{ color: '#B9CBBC' }}>Your balance</div>
-          <div className="font-bold text-sm font-headline" style={{ color: '#E5E2E3' }}>
-            {account ? balance : '—'}
-          </div>
-        </div>
-      </div>
+      {/* Top accent bar */}
+      <div style={{ height: 3, background: meta.color, opacity: 0.7 }} />
 
-      {/* Claim amount */}
+      <div className="p-5 flex flex-col gap-4">
+        {/* Token identity */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+              style={{ background: meta.bg, border: `1px solid ${meta.color}33` }}
+            >
+              {meta.icon}
+            </div>
+            <div>
+              <div className="font-headline font-bold text-sm" style={{ color: '#E5E2E3' }}>
+                {token.name}
+              </div>
+              <div className="text-xs font-mono" style={{ color: '#6B7A6E' }}>{symbol}</div>
+            </div>
+          </div>
+
+          {/* Balance pill */}
+          <div
+            className="flex flex-col items-end gap-0.5 px-3 py-1.5 rounded-lg"
+            style={{ background: '#0E0E0F' }}
+          >
+            <span className="text-xs" style={{ color: '#6B7A6E', fontFamily: 'Inter' }}>Balance</span>
+            <span className="font-headline font-bold text-sm" style={{ color: '#E5E2E3' }}>
+              {account ? balance : '—'}
+            </span>
+          </div>
+        </div>
+
+        {/* Claim amount row */}
+        <div
+          className="flex items-center justify-between px-4 py-2.5 rounded-xl"
+          style={{ background: '#0E0E0F' }}
+        >
+          <span className="text-xs" style={{ color: '#6B7A6E', fontFamily: 'Inter' }}>Claim amount</span>
+          <span className="font-headline font-bold text-sm" style={{ color: meta.color }}>
+            {FAUCET_AMOUNTS[symbol]} {symbol}
+          </span>
+        </div>
+
+        {/* Feedback */}
+        {isSuccess && (
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+            style={{ background: 'rgba(0,255,157,0.07)', color: '#00FF9D', fontFamily: 'Inter' }}
+          >
+            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            <span>Tokens minted successfully</span>
+            {txHash && (
+              <a
+                href={`https://sepolia.arbiscan.io/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+              >
+                View tx
+                <span className="material-symbols-outlined text-xs">open_in_new</span>
+              </a>
+            )}
+          </div>
+        )}
+        {isError && error && (
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+            style={{ background: 'rgba(255,80,80,0.07)', color: '#FF6B6B', fontFamily: 'Inter' }}
+          >
+            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+            <span className="truncate">{error}</span>
+          </div>
+        )}
+
+        {/* CTA button */}
+        <button
+          onClick={isSuccess || isError ? reset : mint}
+          disabled={isDisabled}
+          className="w-full py-2.5 rounded-xl font-headline font-bold text-sm flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98]"
+          style={{
+            background: isDisabled ? 'rgba(255,255,255,0.04)' : meta.bg,
+            color: isDisabled ? '#4A5A4E' : meta.color,
+            border: `1px solid ${isDisabled ? 'rgba(255,255,255,0.06)' : meta.color + '33'}`,
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isPending ? (
+            <>
+              <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+              Minting…
+            </>
+          ) : onCooldown ? (
+            <>
+              <span className="material-symbols-outlined text-base">schedule</span>
+              {formatCooldown(cooldownMs)}
+            </>
+          ) : isSuccess ? (
+            <>
+              <span className="material-symbols-outlined text-base">refresh</span>
+              Claim Again
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-base">water_drop</span>
+              Claim {symbol}
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Network switch overlay ────────────────────────────────────────────────────
+function WrongNetworkOverlay() {
+  const switchChain = useSwitchActiveWalletChain();
+  const [switching, setSwitching] = useState(false);
+
+  const handleSwitch = async () => {
+    setSwitching(true);
+    try { await switchChain(arbitrumSepolia); } finally { setSwitching(false); }
+  };
+
+  return (
+    <div
+      className="rounded-2xl p-8 flex flex-col items-center gap-5 text-center"
+      style={{ background: '#18181A', border: '1px solid rgba(255,100,100,0.2)' }}
+    >
       <div
-        className="rounded-lg px-4 py-3 flex items-center justify-between"
-        style={{ background: '#131314' }}
+        className="w-14 h-14 rounded-full flex items-center justify-center"
+        style={{ background: 'rgba(255,100,100,0.1)' }}
       >
-        <span className="text-xs" style={{ color: '#B9CBBC' }}>Claim amount</span>
-        <span className="font-headline font-bold text-sm" style={{ color }}>
-          {FAUCET_AMOUNTS[symbol]} {symbol}
+        <span className="material-symbols-outlined text-3xl" style={{ color: '#FF6464', fontVariationSettings: "'FILL' 1" }}>
+          wifi_off
         </span>
       </div>
-
-      {/* Status feedback */}
-      {status === 'success' && (
-        <div className="rounded-lg px-4 py-2 flex items-center gap-2 text-xs" style={{ background: 'rgba(0,255,157,0.08)', color: '#00FF9D' }}>
-          <span className="material-symbols-outlined text-base">check_circle</span>
-          Minted! Check your wallet.
-          {txHash && (
-            <a
-              href={`https://sepolia.arbiscan.io/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto underline opacity-70 hover:opacity-100"
-            >
-              Tx ↗
-            </a>
-          )}
+      <div>
+        <div className="font-headline font-bold text-lg mb-1" style={{ color: '#E5E2E3' }}>
+          Wrong Network
         </div>
-      )}
-      {status === 'error' && error && (
-        <div className="rounded-lg px-4 py-2 flex items-center gap-2 text-xs" style={{ background: 'rgba(255,80,80,0.08)', color: '#FF6B6B' }}>
-          <span className="material-symbols-outlined text-base">error</span>
-          {error}
+        <div className="text-sm" style={{ color: '#6B7A6E', fontFamily: 'Inter' }}>
+          VerdexSwap runs on Arbitrum Sepolia. Switch your network to use the faucet.
         </div>
-      )}
-
-      {/* Claim button */}
+      </div>
       <button
-        onClick={status === 'success' || status === 'error' ? reset : mint}
-        disabled={isPending || onCooldown || !account}
-        className="w-full py-3 rounded-lg font-headline font-bold text-sm transition-all duration-200 active:scale-95"
-        style={{
-          background: isPending || onCooldown
-            ? 'rgba(255,255,255,0.05)'
-            : `${color}22`,
-          color: isPending || onCooldown ? '#B9CBBC' : color,
-          border: `1px solid ${isPending || onCooldown ? 'rgba(255,255,255,0.08)' : `${color}44`}`,
-          cursor: isPending || onCooldown || !account ? 'not-allowed' : 'pointer',
-        }}
+        onClick={handleSwitch}
+        disabled={switching}
+        className="flex items-center gap-2 px-6 py-3 rounded-xl font-headline font-bold text-sm transition-all active:scale-[0.98] hover:brightness-110"
+        style={{ background: '#FF6464', color: '#fff', cursor: switching ? 'wait' : 'pointer' }}
       >
-        {isPending ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
-            Minting…
-          </span>
-        ) : onCooldown ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-base">schedule</span>
-            {formatCooldown(cooldownMs)}
-          </span>
-        ) : status === 'success' ? (
-          'Claim Again'
+        {switching ? (
+          <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
         ) : (
-          <span className="flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-base">water_drop</span>
-            Claim {symbol}
-          </span>
+          <span className="material-symbols-outlined text-base">swap_horiz</span>
         )}
+        {switching ? 'Switching…' : 'Switch to Arbitrum Sepolia'}
       </button>
     </div>
   );
@@ -160,6 +225,11 @@ function TokenFaucetCard({ symbol }: { symbol: TokenSymbol }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 const FaucetPage = () => {
   const account = useActiveAccount();
+  const activeChain = useActiveWalletChain();
+
+  const isConnected = !!account?.address;
+  const isWrongNetwork = isConnected && !!activeChain && activeChain.id !== CHAIN_ID;
+  const isReady = isConnected && activeChain?.id === CHAIN_ID;
 
   return (
     <div className="min-h-screen font-body" style={{ background: '#131314', color: '#E5E2E3' }}>
@@ -168,62 +238,94 @@ const FaucetPage = () => {
 
       <main style={{ marginLeft: 200, paddingTop: 65, minHeight: '100vh' }}>
         {/* Ambient glow */}
-        <div className="pointer-events-none fixed" style={{
-          width: 600, height: 600,
-          background: 'rgba(0,255,157,0.03)', filter: 'blur(120px)',
-          borderRadius: '50%', top: '5%', right: '10%', zIndex: 0,
-        }} />
+        <div
+          className="pointer-events-none fixed"
+          style={{
+            width: 500, height: 500,
+            background: 'rgba(0,255,157,0.025)',
+            filter: 'blur(120px)',
+            borderRadius: '50%',
+            top: '10%', right: '8%', zIndex: 0,
+          }}
+        />
 
-        <div className="relative z-10 px-8 py-8 max-w-4xl">
-          {/* Header */}
+        <div className="relative z-10 px-8 py-8" style={{ maxWidth: 860 }}>
+
+          {/* Page header */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="material-symbols-outlined text-2xl" style={{ color: '#00FF9D' }}>water_drop</span>
-              <h1 className="font-black text-3xl font-headline" style={{ color: '#E5E2E3', letterSpacing: '-0.02em' }}>
+            <div className="flex items-center gap-2.5 mb-2">
+              <span
+                className="material-symbols-outlined text-xl"
+                style={{ color: '#00FF9D', fontVariationSettings: "'FILL' 1" }}
+              >
+                water_drop
+              </span>
+              <h1
+                className="font-black text-2xl font-headline"
+                style={{ color: '#E5E2E3', letterSpacing: '-0.02em' }}
+              >
                 Testnet Faucet
               </h1>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                style={{ background: 'rgba(0,255,157,0.1)', color: '#00FF9D', fontFamily: 'Inter' }}
+              >
+                Arbitrum Sepolia
+              </span>
             </div>
-            <p className="text-sm leading-relaxed max-w-lg" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-              Claim free testnet tokens to explore VerdexSwap. Each token has a 24-hour cooldown per wallet.
-              You'll need ETH from the{' '}
+            <p className="text-sm leading-relaxed" style={{ color: '#6B7A6E', fontFamily: 'Inter', maxWidth: 480 }}>
+              Claim free mock tokens to test VerdexSwap. Each token has a 24-hour cooldown per wallet.
+              You'll also need{' '}
               <a
                 href="https://faucet.triangleplatform.com/arbitrum/sepolia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:text-[#00FF9D] transition-colors"
+                className="underline decoration-dotted hover:text-[#00FF9D] transition-colors"
+                style={{ color: '#B9CBBC' }}
               >
-                Arbitrum Sepolia faucet
+                Arbitrum Sepolia ETH
               </a>{' '}
-              to pay gas.
+              for gas.
             </p>
           </div>
 
-          {/* Connect prompt */}
-          {!account && (
-            <div className="mb-8">
-              <ConnectPrompt message="Connect your wallet to claim testnet tokens." />
+          {/* States */}
+          {!isConnected && (
+            <ConnectPrompt message="Connect your wallet to claim testnet tokens." />
+          )}
+
+          {isWrongNetwork && <WrongNetworkOverlay />}
+
+          {/* Token grid */}
+          {(isReady || !isConnected) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SYMBOLS.map(symbol => (
+                <TokenCard key={symbol} symbol={symbol} disabled={!isReady} />
+              ))}
             </div>
           )}
 
-          {/* Token grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SYMBOLS.map(symbol => (
-              <TokenFaucetCard key={symbol} symbol={symbol} />
-            ))}
-          </div>
-
-          {/* Info footer */}
-          <div
-            className="mt-8 rounded-xl p-5 flex gap-4 items-start"
-            style={{ background: '#1C1B1C', border: '1px solid rgba(255,255,255,0.06)' }}
-          >
-            <span className="material-symbols-outlined text-xl flex-shrink-0 mt-0.5" style={{ color: '#B9CBBC' }}>info</span>
-            <div className="text-xs leading-relaxed" style={{ color: '#B9CBBC', fontFamily: 'Inter' }}>
-              These are mock ERC-20 tokens deployed on Arbitrum Sepolia for testing purposes only. They have no real-world value.
-              The faucet calls <code className="px-1 py-0.5 rounded text-xs" style={{ background: '#131314', color: '#00FF9D' }}>mint()</code> directly
-              on each token contract — no backend required.
+          {/* Info note */}
+          {isReady && (
+            <div
+              className="mt-6 flex items-start gap-3 px-5 py-4 rounded-xl"
+              style={{ background: '#18181A', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <span className="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style={{ color: '#6B7A6E' }}>
+                info
+              </span>
+              <p className="text-xs leading-relaxed" style={{ color: '#6B7A6E', fontFamily: 'Inter' }}>
+                These are mock ERC-20 tokens on Arbitrum Sepolia with no real-world value. The faucet calls{' '}
+                <code
+                  className="px-1 py-0.5 rounded text-xs"
+                  style={{ background: '#0E0E0F', color: '#00FF9D' }}
+                >
+                  mint()
+                </code>{' '}
+                directly on each contract — no backend or custodian required.
+              </p>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

@@ -12,6 +12,7 @@ const navItems: NavItem[] = [
   { label: 'Earn', icon: 'savings', to: '/earn' },
   { label: 'Portfolio', icon: 'account_balance_wallet', to: '/portfolio' },
   { label: 'Analytics', icon: 'bar_chart', to: '/analytics' },
+  { label: 'Faucet',    icon: 'water_drop', to: '/faucet' },
 ];
 
 const AppSidebar = () => {
