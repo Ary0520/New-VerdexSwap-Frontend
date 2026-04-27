@@ -291,7 +291,10 @@ const FaucetPage = () => {
 
           {/* States */}
           {!isConnected && (
-            <ConnectPrompt message="Connect your wallet to claim testnet tokens." />
+            <ConnectPrompt
+              title="Connect your wallet"
+              description="Connect your wallet to claim testnet tokens."
+            />
           )}
 
           {isWrongNetwork && <WrongNetworkOverlay />}
